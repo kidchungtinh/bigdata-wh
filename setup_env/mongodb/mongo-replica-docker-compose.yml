@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  mongo-primary:
+    container_name: mongo-primary
+    image: mongo
+    volumes:
+      - ~/mongors/primary:/data/db
+      - ./rs-init.sh:/scripts/rs-init.sh
+    networks:
+      - mongors-network
+    ports:
+      - 27021:27017
+    links:
+      - mongo-secondary-1
+      - mongo-secondary-2
+    restart: always
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0" ]
+  mongo-secondary-1:
+    container_name: mongo-secondary-1
+    image: mongo
+    volumes:
+      - ~/mongors/secondary1:/data/db
+    networks:
+      - mongors-network
+    ports:
+      - 27022:27017
+    restart: always
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0" ]
+  mongo-secondary-2:
+    container_name: mongo-secondary-2
+    image: mongo
+    volumes:
+      - ~/mongors/secondary2:/data/db
+    networks:
+      - mongors-network
+    ports:
+      - 27023:27017
+    restart: always
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0" ]
+
+volumes:
+  mongo-primary:
+  mongo-secondary-1:
+  mongo-secondary-2:
+
+networks:
+  mongors-network:
+    driver: bridge
